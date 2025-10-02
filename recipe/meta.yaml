@@ -6,22 +6,21 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/pyportfolioopt-{{ version }}.tar.gz
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: 7e94f41c84fb5865c7a64de995a3ba580188f3ba494f6dfbc02721b5de323f6e
 
 build:
-  noarch: python
-  script: {{ PYTHON }} -m pip install . -vv
-  number: 1
+  number: 0
+  skip: true  # [py<310]
+  script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
 
 requirements:
   host:
     - pip
-    - poetry
-    - python {{ python_min }}
-    - setuptools
+    - python
+    - poetry-core >=1.0.0
   run:
-    - python >={{ python_min }}
+    - python
     - cvxpy >=1.1.19
     - numpy >=1.26.0
     - pandas >=0.19
@@ -29,21 +28,33 @@ requirements:
   run_constrained:
     - matplotlib-base >=3.2
     - scikit-learn >=0.24.1
+    - ecos >=2.0.14,<3.0.0
+    - plotly >=5.0.0,<6.0.0
 
 test:
+  # Test folder is not available in PYPI tarball, and there is no release on github to get them
   imports:
     - pypfopt
-  # commands:
-  #  - pip check
+    - pypfopt.discrete_allocation
   requires:
-    - python {{ python_min }}
-  #  - pip
+    - pip
+  commands:
+    - pip check
+    - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
 
 about:
   home: https://github.com/robertmartin8/PyPortfolioOpt
-  summary: Financial portfolio optimization in python
   license: MIT
+  license_family: MIT
   license_file: LICENSE.txt
+  summary: Financial portfolio optimization in python
+  description: |
+    PyPortfolioOpt is a library that implements portfolio optimization methods, 
+    including classical mean-variance optimization techniques and Black-Litterman 
+    allocation, as well as more recent developments in the field like shrinkage 
+    and Hierarchical Risk Parity.
+  dev_url: https://github.com/robertmartin8/PyPortfolioOpt
+  doc_url: https://github.com/robertmartin8/PyPortfolioOpt/tree/master/docs
 
 extra:
   recipe-maintainers:
